@@ -16,14 +16,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    extractbandizip.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    extractbandizip.h \
     mainwindow.h
 
 FORMS += \
     mainwindow.ui
+
+TRANSLATIONS += \
+    lang_zh-CN.ts
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
