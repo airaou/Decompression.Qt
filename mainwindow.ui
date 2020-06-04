@@ -14,7 +14,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>解压自动化</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -117,8 +117,15 @@
      <string>帮助</string>
     </property>
     <addaction name="actionHelp"/>
-    <addaction name="actionABOUT"/>
+    <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>语言</string>
+    </property>
+    <addaction name="actionLoadQm"/>
+   </widget>
+   <addaction name="menu_2"/>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -127,9 +134,14 @@
     <string>帮助(&amp;H)</string>
    </property>
   </action>
-  <action name="actionABOUT">
+  <action name="actionAbout">
    <property name="text">
     <string>关于(&amp;A)</string>
+   </property>
+  </action>
+  <action name="actionLoadQm">
+   <property name="text">
+    <string>加载QM语言包(&amp;Q)</string>
    </property>
   </action>
  </widget>

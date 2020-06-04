@@ -1,0 +1,64 @@
+{
+    "head_pattern": [
+        {
+            "ext_name": "zip",
+            "head": "PK\u0003\u0004"
+        },
+        {
+            "ext_name": "rar",
+            "head": "Rar!"
+        },
+        {
+            "ext_name": "7z",
+            "head": "7z\u00BC\u00AF"
+        },
+        {
+            "ext_name": "cab",
+            "head": "MSCF"
+        },
+        {
+            "ext_name": "gz",
+            "head": "\u001F\u008B\u0008\u0008"
+        },
+        {
+            "ext_name": "bz2",
+            "head": "BZh9"
+        },
+        {
+            "ext_name": "xz",
+            "head": "\u00FD7zXZ"
+        },
+        {
+            "ext_name": "lzma",
+            "head": "\u005D\u0000\u0000\u0040"
+        },
+        {
+            "ext_name": "wim",
+            "head": "MSWIM"
+        }
+    ],
+    "filename_psw_pattern": "<(.*)>",
+    "variables": {
+        "7Z": "Test"
+    },
+    "passwords": [
+        "TestPsw1",
+        "TestPsw2"
+    ],
+    "extract_pgmname": [
+        "bc.exe"
+    ],
+    "extracts": [
+        {
+            "ext_names": ["zip", "rar", "7z", "cab", "gz", "bz2", "xz", "lzma", "wim"],
+            "program": "$(bc.exe)",
+            "args": ["x", "$(infile)", "$(outdir)"],
+            "args_psw": ["x", "-p:$(psw)", "$(infile)", "$(outdir)"],
+            "succeed_errorlevel": 0,
+            "error_detect" : {
+                "need_psw": "ERROR: Password required",
+                "archive_error": "ERROR: Unkno.. archive"
+            }
+        }
+    ]
+}
