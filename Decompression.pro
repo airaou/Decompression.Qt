@@ -21,6 +21,7 @@ SOURCES += \
     envvars.cpp \
     extracter.cpp \
     filedetector.cpp \
+    inputfiles.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -28,6 +29,7 @@ HEADERS += \
     envvars.h \
     extracter.h \
     filedetector.h \
+    inputfiles.h \
     mainwindow.h
 
 FORMS += \
@@ -42,4 +44,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    extractcfg.bak.json \
     extractcfg.json

@@ -11,6 +11,7 @@
 #include "extracter.h"
 #include "filedetector.h"
 #include "envvars.h"
+#include "inputfiles.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -35,31 +36,46 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionHelp_triggered();
     void on_actionLoadQm_triggered();
+    void on_actionLoadCfg_triggered();
+    void on_actionSaveCfg_triggered();
+    void on_actionExit_triggered();
+    void on_actionDbgout_triggered();
 
-    void on_infilesList_itemDoubleClicked(QListWidgetItem *item);
+    void on_pswEdit_returnPressed();
+    void on_pswDelButton_clicked();
+    void on_archDelButton_clicked();
+
+public slots:
+    void save_config();
 
 protected:
     void set_qmfile(QString filepath);
-    void load_config(QString filepath);
+    void import_config(QString filepath);
+    void export_config(QString filepath);
 
     void append_passwords(QJsonArray const& psws);
+    QJsonArray export_passwords();
     void append_variables(QJsonObject const& vars);
-    void append_extract_pgmname(QJsonArray const& names);
+    QJsonObject export_variables();
+    void append_extract_pgmnames(QJsonArray const& names);
+    QJsonArray export_extract_pgmnames();
 
     bool load_jsonfile(QString filepath, QJsonObject &jobj);
 
 private:
     Ui::MainWindow *ui;
+    QJsonObject jcfgobj;
+
     QTranslator *translator;
 
-    QDir outdir;
-    QList<QFileInfo> infiles;
-    QStringList passwords;
+    QDir defoutdir;
+    InputFiles infiles;
+    QSet<QString> passwords;
     EnvVars variables;
     QStringList extract_pgmname;
     QRegExp filename_psw_pattern;
 
     QList<Extracter> extrs;
-    FileDetector detector;
+    FileDetector head_pattern;
 };
 #endif // MAINWINDOW_H

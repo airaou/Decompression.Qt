@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
-    <height>421</height>
+    <width>1000</width>
+    <height>363</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -17,62 +17,152 @@
    <string>解压自动化</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_4">
     <item>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>压缩包列表</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QListWidget" name="infilesList">
-        <property name="font">
-         <font>
-          <family>新宋体</family>
-         </font>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>密码列表</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QListWidget" name="pswList"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_1">
-        <property name="text">
-         <string>输出目录</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="outdirEdit">
-        <property name="acceptDrops">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
-       <widget class="QCheckBox" name="checkBox">
-        <property name="text">
-         <string>为解压的文件各建文件夹</string>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>配置</string>
         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <layout class="QFormLayout" name="formLayout">
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>压缩包列表</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clearButton">
+               <property name="text">
+                <string>清空列表</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="archDelButton">
+               <property name="text">
+                <string>移除选中</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="1">
+            <widget class="QListWidget" name="infilesList">
+             <property name="font">
+              <font>
+               <family>新宋体</family>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_1">
+             <property name="text">
+              <string>输出目录</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="outdirEdit">
+             <property name="acceptDrops">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>密码列表</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pswDelButton">
+               <property name="text">
+                <string>移除选中</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="1">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QListWidget" name="pswList">
+               <property name="font">
+                <font>
+                 <family>新宋体</family>
+                </font>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="pswEdit">
+               <property name="acceptDrops">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="mkdirCheckBox">
+          <property name="text">
+           <string>为压缩包各建文件夹</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QPushButton" name="startButton">
           <property name="text">
@@ -80,25 +170,47 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="clearButton">
-          <property name="text">
-           <string>清空压缩包列表</string>
-          </property>
-         </widget>
-        </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
     <item>
-     <widget class="QProgressBar" name="progressBar">
-      <property name="value">
-       <number>0</number>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <property name="textVisible">
-       <bool>false</bool>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="dbgGroupBox">
+      <property name="title">
+       <string>调试输出</string>
       </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QPlainTextEdit" name="dbgoutEdit">
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="plainText">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -108,7 +220,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>494</width>
+     <width>1000</width>
      <height>23</height>
     </rect>
    </property>
@@ -125,7 +237,23 @@
     </property>
     <addaction name="actionLoadQm"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>配置</string>
+    </property>
+    <addaction name="actionLoadCfg"/>
+    <addaction name="actionSaveCfg"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>调试</string>
+    </property>
+    <addaction name="actionDbgout"/>
+   </widget>
+   <addaction name="menu_3"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_4"/>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -133,18 +261,82 @@
    <property name="text">
     <string>帮助(&amp;H)</string>
    </property>
+   <property name="toolTip">
+    <string>帮助</string>
+   </property>
   </action>
   <action name="actionAbout">
    <property name="text">
     <string>关于(&amp;A)</string>
+   </property>
+   <property name="toolTip">
+    <string>关于</string>
    </property>
   </action>
   <action name="actionLoadQm">
    <property name="text">
     <string>加载QM语言包(&amp;Q)</string>
    </property>
+   <property name="toolTip">
+    <string>加载QM语言包</string>
+   </property>
+  </action>
+  <action name="actionLoadCfg">
+   <property name="text">
+    <string>重新加载extractcfg.json</string>
+   </property>
+  </action>
+  <action name="actionSaveCfg">
+   <property name="text">
+    <string>保存配置(&amp;S)</string>
+   </property>
+   <property name="toolTip">
+    <string>保存配置</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>保存配置并退出(&amp;C)</string>
+   </property>
+   <property name="toolTip">
+    <string>保存配置并退出</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionDbgout">
+   <property name="text">
+    <string>调试输出(&amp;D)</string>
+   </property>
+   <property name="toolTip">
+    <string>开启调试输出</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>246</x>
+     <y>210</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

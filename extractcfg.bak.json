@@ -1,0 +1,81 @@
+{
+    "head_pattern": [
+        {
+            "ext_name": "zip",
+            "head": [50, 75, 3, 4]
+        },
+        {
+            "ext_name": "rar",
+            "head": [82, 97, 114, 33]
+        },
+        {
+            "ext_name": "7z",
+            "head": [55, 122, 188, 175]
+        },
+        {
+            "ext_name": "cab",
+            "head": [77, 83, 67, 70]
+        },
+        {
+            "ext_name": "gz",
+            "head": [31, 139, 8, 8]
+        },
+        {
+            "ext_name": "bz2",
+            "head": [66, 90, 104, 57]
+        },
+        {
+            "ext_name": "xz",
+            "head": [253, 55, 122, 88, 90]
+        },
+        {
+            "ext_name": "lzma",
+            "head": [93, 0, 0, 64]
+        },
+        {
+            "ext_name": "wim",
+            "head": [77, 83, 87, 73, 77]
+        }
+    ],
+    "filename_psw_pattern": "\\{([^}]+)\\}",
+    "variables": {
+        "7Z": "Test",
+        "bc.exe": "C:/Program Files/Bandizip/bc.exe"
+    },
+    "passwords": [
+        "TestPsw1",
+        "TestPsw2"
+    ],
+    "extract_pgmnames": [
+        "bc.exe",
+        "UnRAR.exe"
+    ],
+    "outdir": "../outdir",
+    "extracts": [
+        {
+            "ext_names": ["zip", "7z", "cab", "gz", "bz2", "xz", "lzma", "wim"],
+            "program": "$(bc.exe)",
+            "args": ["x", "-y", "$(infile)", "$(outdir)"],
+            "succeed_errorlevel": 0,
+            "error_detect" : {
+                "psw_error": "ERROR: Password required",
+                "archive_error": "ERROR: Unkno.. archive"
+            }
+        }, {
+            "ext_names": ["rar"],
+            "program": "$(UnRAR.exe)",
+            "args": ["x", "-y", "-p-", "-p$(psw)", "--", "$(infile)", "$(outdir)"],
+            "succeed_errorlevel": 0,
+            "error_detect": {
+                "psw_error": "The specified password is incorrect\\.",
+                "archive_error": "is not RAR archive"
+            }
+        }
+    ],
+    "icons": {
+        "ok": "./rc/confirm-ico-success-s.png",
+        "pswerr": "./rc/confirm-ico-warn-s.png",
+        "deferr": "./rc/confirm-ico-error-s.png",
+        "ready": "./rc/none.png"
+    }
+}

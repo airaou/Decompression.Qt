@@ -4,17 +4,14 @@
 #include <QByteArray>
 #include <QMap>
 
-class FileDetector {
-
+class FileDetector : public QMap<QByteArray, QString> {
 public:
-    FileDetector();
+    using QMap<QByteArray, QString>::QMap;
 
-    void append(QByteArray head_bytes, QString ext_name);
     bool detect(QString filepath, QString &ext_name);
 
 private:
     int head_pattern_maxlen();
-    QMap<QByteArray, QString> head_pattern;
 };
 
 #endif // FILEDETECTOR_H

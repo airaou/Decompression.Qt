@@ -7,20 +7,35 @@
 #include <optional>
 #include "envvars.h"
 
+#include <QObject>
+
 class Extracter {
 public:
+    enum ErrorCode {
+        SUCCEED,
+        PGM_ERROR,
+        PSW_ERROR,
+        ARCH_ERROR,
+        EXITCODE_INCORRECT,
+    };
+
+public:
     Extracter(QJsonObject const& jobj, EnvVars const& variables);
-    bool canExtract(QString const& ext_name);
-    bool extract(QString const& infilepath, QString const& outdirpath, QString &errormsg);
+    QJsonObject export_extracts() const;
+
+    bool canExtract(QString ext_name) const;
+    ErrorCode extract(QString infilepath,
+                      QString outdirpath,
+                      QSet<QString> const& psws,
+                      QString &errmsg) const;
 
 private:
     EnvVars const& variables;
     QStringList ext_names;
     QString program;
-    QStringList args;
-    std::optional<QStringList> args_psw;
+    QStringList args_template;
     std::optional<int> succeed_errorlevel;
-    std::optional<QRegExp> need_psw;
+    std::optional<QRegExp> psw_error;
     std::optional<QRegExp> archive_error;
 };
 
