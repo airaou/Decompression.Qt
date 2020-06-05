@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>363</height>
+    <width>797</width>
+    <height>396</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -51,6 +51,13 @@
               <widget class="QPushButton" name="archDelButton">
                <property name="text">
                 <string>移除选中</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="resetErrButton">
+               <property name="text">
+                <string>错误重置</string>
                </property>
               </widget>
              </item>
@@ -161,6 +168,9 @@
           <property name="text">
            <string>为压缩包各建文件夹</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -196,7 +206,7 @@
       <property name="title">
        <string>调试输出</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QPlainTextEdit" name="dbgoutEdit">
          <property name="acceptDrops">
@@ -210,6 +220,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="clrDbgoutButton">
+         <property name="text">
+          <string>清空输出</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -220,7 +237,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
+     <width>797</width>
      <height>23</height>
     </rect>
    </property>

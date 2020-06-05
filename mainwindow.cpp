@@ -14,14 +14,17 @@
 #include <QtMath>
 #include <QJsonArray>
 #include <QRegExp>
+#include <QMutex>
 
-static MainWindow* signle = nullptr;
+static MainWindow* single = nullptr;
+static QMutex single_mutex;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , translator(nullptr)
     , infiles()
+    , thread_quick_exit(false)
 {
     ui->setupUi(this);
 
@@ -32,19 +35,30 @@ MainWindow::MainWindow(QWidget *parent)
     set_qmfile("./lang_zh-CN.qm");
     import_config("./extractcfg.json");
     ui->statusbar->showMessage(tr("Ready."));
-    signle = this;
+    single = this;
     qInstallMessageHandler([](QtMsgType type,
                            const QMessageLogContext &ctx,
                            const QString &msg) {
-        if(signle) {
-            signle->ui->dbgoutEdit->appendPlainText(msg);
+        QMutexLocker locker(&single_mutex);
+        if(single) {
+            // single->ui->dbgoutEdit->appendPlainText(msg);
+            emit single->debugString(msg);
         }
     });
+    connect(this, &MainWindow::message, ui->statusbar, &QStatusBar::showMessage);
+    connect(this, &MainWindow::debugString, ui->dbgoutEdit, &QPlainTextEdit::appendPlainText);
+    connect(this, &MainWindow::workFinished, ui->startButton, &QPushButton::setEnabled);
+    connect(this, &MainWindow::workProgress, ui->progressBar, &QProgressBar::setValue);
+    connect(this, &MainWindow::changeInfileState, this, &MainWindow::setInfileState);
     qDebug() << "Setup";
 }
 
 MainWindow::~MainWindow() {
-    signle = nullptr;
+    thread_quick_exit = true;
+    if(t.joinable()) {
+        t.join();
+    }
+    single = nullptr;
     delete ui;
 }
 
@@ -111,10 +125,10 @@ void MainWindow::import_config(QString filepath) {
         QFileInfo outdirinfo(jcfgobj["outdir"].toString("."));
         if(outdirinfo.isDir()) {
             defoutdir = QDir(outdirinfo.filePath());
-            ui->outdirEdit->setText(defoutdir.absolutePath());
         } else {
             QMessageBox::warning(this, tr("Warning"), tr("%1 is not a folder.").arg(outdirinfo.filePath()));
         }
+        ui->outdirEdit->setText(defoutdir.absolutePath());
     }
 
     jvalue = jcfgobj["head_pattern"];
@@ -131,6 +145,7 @@ void MainWindow::import_config(QString filepath) {
 
     jvalue = jcfgobj["icons"];
     infiles.load_icons(jvalue.toObject(QJsonObject()));
+    ui->statusbar->showMessage(tr("Config file loaded."));
 }
 
 void MainWindow::export_config(QString filepath) {
@@ -176,6 +191,7 @@ void MainWindow::export_config(QString filepath) {
     QJsonDocument jdoc(jcfgobj);
     file.write(jdoc.toJson(QJsonDocument::JsonFormat::Indented));
     file.close();
+    ui->statusbar->showMessage(tr("Config file saved."));
 }
 
 void MainWindow::append_passwords(QJsonArray const& psws) {
@@ -325,7 +341,7 @@ void MainWindow::dropEvent(QDropEvent *e) {
                         } else {
                             qDebug() << "Unknow archive type.";
                             infiles.back().state = InputFile::UNKNOWNERR;
-                            ui->infilesList->item(infiles.size() - 1)->setIcon(infiles.deferr_icon);
+                            emit setInfileState(infiles.size() - 1, infiles.deferr_icon, tr("Unknown archive type."));
                         }
                     }
                 }
@@ -342,6 +358,7 @@ void MainWindow::dropEvent(QDropEvent *e) {
 
 
 void MainWindow::on_startButton_clicked() {
+    ui->startButton->setDisabled(true);
     qDebug() << "Start button clicked";
     ui->progressBar->setValue(0);
     if(infiles.size() == 0) {
@@ -349,105 +366,118 @@ void MainWindow::on_startButton_clicked() {
         return;
     }
     ui->progressBar->setRange(0, infiles.size());
-    QList<QFileInfo> newinfiles;
-    int succeed = 0;
-    int failed = 0;
-    int pswerr = 0;
-    int skiped = 0;
-    int row = 0;
-    for(auto &infile : infiles) {
-        if(infile.state == infile.WAITING) {
-            QFileInfo infileinfo = infile.info;
-            QString infileabsfilepath = infileinfo.absoluteFilePath();
-            QString infilename = infileinfo.fileName();
 
-            ui->statusbar->showMessage(tr("Handling archive %1.").arg(infileinfo.fileName()));
+    if(t.joinable()) {
+        t.join();
+    }
+    t = std::thread([this]() {
 
-            QDir outdir(defoutdir);
-            if(ui->mkdirCheckBox->isChecked()) {
-                outdir.mkdir(infilename);
-                outdir.cd(infilename);
-            }
+        QList<QFileInfo> newinfiles;
+        int succeed = 0;
+        int failed = 0;
+        int pswerr = 0;
+        int skiped = 0;
+        int row = 0;
+        for(auto &infile : infiles) {
+            if(infile.state == infile.WAITING) {
+                QFileInfo infileinfo = infile.info;
+                QString infileabsfilepath = infileinfo.absoluteFilePath();
+                QString infilename = infileinfo.fileName();
 
-            qDebug() << "archive: " << infileabsfilepath;
-            qDebug() << "outdir: " << outdir.path();
+                ui->statusbar->showMessage(tr("Handling archive %1.").arg(infileinfo.fileName()));
+                emit changeInfileState(row, infiles.waiting_icon, "");
 
-            if(QString ext_name; head_pattern.detect(infileabsfilepath, ext_name)) {
-                bool extr_found = false;
-                for(auto &extr : extrs) {
-                    if(!extr.canExtract(ext_name)) {
-                        continue;
-                    }
-                    extr_found = true;
-                    QSet<QString> namepsws(passwords);
-                    for(int idx = 0;; idx++) {
-                        if((idx = infileabsfilepath.indexOf(filename_psw_pattern, idx)) == -1) {
+                QDir outdir(defoutdir);
+                if(ui->mkdirCheckBox->isChecked()) {
+                    outdir.mkdir(infilename);
+                    outdir.cd(infilename);
+                }
+
+                qDebug() << "archive: " << infileabsfilepath;
+                qDebug() << "outdir: " << outdir.path();
+
+                if(QString ext_name; head_pattern.detect(infileabsfilepath, ext_name)) {
+                    bool extr_found = false;
+                    for(auto &extr : extrs) {
+                        if(!extr.canExtract(ext_name)) {
+                            continue;
+                        }
+                        extr_found = true;
+                        QSet<QString> namepsws(passwords);
+                        for(int idx = 0;; idx++) {
+                            if((idx = infileabsfilepath.indexOf(filename_psw_pattern, idx)) == -1) {
+                                break;
+                            }
+                            namepsws << filename_psw_pattern.cap(1);
+                        }
+                        qDebug() << "psws: " << namepsws;
+                        QString errmsg;
+                        Extracter::ErrorCode code = extr.extract(infileabsfilepath,
+                                                                 outdir.path(),
+                                                                 namepsws,
+                                                                 thread_quick_exit,
+                                                                 errmsg);
+                        if(errmsg.size() > 0 || code != Extracter::SUCCEED) {
+                            qDebug() << "Found error: " << errmsg;
+                            qDebug() << "Error code: " << code;
+                            ui->statusbar->showMessage(tr("Found error: %1.").arg(errmsg));
+                        }
+                        switch(code) {
+                        case Extracter::PSW_ERROR:
+                            pswerr += 1;
+                            infile.state = infile.PSWERR;
+                            emit changeInfileState(row, infiles.pswerr_icon, errmsg);
+                            break;
+                        case Extracter::ARCH_ERROR:
+                        case Extracter::PGM_ERROR:
+                        case Extracter::EXITCODE_INCORRECT:
+                            failed += 1;
+                            infile.state = infile.UNKNOWNERR;
+                            emit changeInfileState(row, infiles.deferr_icon, errmsg);
+                            break;
+                        case Extracter::SUCCEED:
+                        default:
+                            // 未知错误均为通过
+                            succeed += 1;
+                            infile.state = infile.FINISHED;
+                            emit changeInfileState(row, infiles.ok_icon, "");
                             break;
                         }
-                        namepsws << filename_psw_pattern.cap(1);
+                        if(code == Extracter::SUCCEED) {
+                            // TODO: 深入检查内部压缩包
+                            break;
+                        }
+                        // 切换另一解压器
                     }
-                    QString errmsg;
-                    Extracter::ErrorCode code = extr.extract(infileabsfilepath,
-                                                             outdir.path(),
-                                                             namepsws,
-                                                             errmsg);
-                    if(errmsg.size() > 0 || code != Extracter::SUCCEED) {
-                        qDebug() << "Found error: " << errmsg;
-                        qDebug() << "Error code: " << code;
-                        ui->statusbar->showMessage(tr("Found error: %1.").arg(errmsg));
-                    }
-                    switch(code) {
-                    case Extracter::PSW_ERROR:
-                        ui->infilesList->item(row)->setIcon(infiles.pswerr_icon);
-                        infile.state = infile.PSWERR;
-                        pswerr += 1;
-                        break;
-                    case Extracter::ARCH_ERROR:
-                    case Extracter::PGM_ERROR:
-                    case Extracter::EXITCODE_INCORRECT:
+                    if(!extr_found) {
+                        // 找不到解压器
+                        qDebug() << "Can not find an extracter.";
                         failed += 1;
                         infile.state = infile.UNKNOWNERR;
-                        ui->infilesList->item(row)->setIcon(infiles.deferr_icon);
-                        break;
-                    case Extracter::SUCCEED:
-                    default:
-                        // 未知错误均为通过
-                        succeed += 1;
-                        infile.state = infile.FINISHED;
-                        ui->infilesList->item(row)->setIcon(infiles.ok_icon);
-                        break;
+                        emit changeInfileState(row, infiles.deferr_icon,
+                                               tr("Can not find an extracter. "
+                                                  "Please check the config file extractcfg.json."));
                     }
-                    if(code == Extracter::SUCCEED) {
-                        // TODO: 深入检查内部压缩包
-                        break;
-                    }
-                    // 切换另一解压器
-                }
-                if(!extr_found) {
-                    // 找不到解压器
-                    qDebug() << "Can not find an extracter. Please check the config file extractcfg.json.";
+                } else {
+                    // 未知压缩包类型
+                    qDebug() << "Unknown archive type";
                     failed += 1;
                     infile.state = infile.UNKNOWNERR;
-                    ui->infilesList->item(row)->setIcon(infiles.deferr_icon);
+                    emit changeInfileState(row, infiles.deferr_icon, tr("Unknown archive type."));
                 }
             } else {
-                // 未知压缩包类型
-                qDebug() << "Unknown archive type";
-                failed += 1;
-                infile.state = infile.UNKNOWNERR;
-                ui->infilesList->item(row)->setIcon(infiles.deferr_icon);
+                // 已经处理过的压缩包
+                qDebug() << "Skiped";
+                skiped += 1;
             }
-        } else {
-            // 已经处理过的压缩包
-            qDebug() << "Skiped";
-            skiped += 1;
+            row += 1;
+            emit workProgress(row);
         }
-        row += 1;
-        ui->progressBar->setValue(row);
-    }
-    infiles.append(newinfiles);
-    ui->statusbar->showMessage(tr("Succeed: %1, failed: %2, password incorrect: %3, skiped: %4. Found new archive: %5.")
-                               .arg(succeed).arg(failed).arg(pswerr).arg(skiped).arg(infiles.size()));
+        infiles.append(newinfiles);
+        emit message(tr("Succeed: %1, failed: %2, password incorrect: %3, skiped: %4. Found new archive: %5.")
+                     .arg(succeed).arg(failed).arg(pswerr).arg(skiped).arg(newinfiles.size()), 0);
+        emit workFinished(true);
+    });
 }
 
 void MainWindow::on_clearButton_clicked() {
@@ -497,19 +527,14 @@ void MainWindow::on_actionLoadCfg_triggered() {
     ui->statusbar->showMessage(tr("Ready."));
 }
 
-void MainWindow::save_config() {
-    qDebug() << "Save config";
-    export_config("./extractcfg.json");
-}
-
 void MainWindow::on_actionSaveCfg_triggered() {
     qDebug() << "Save config action";
-    save_config();
+    saveConfig();
 }
 
 void MainWindow::on_actionExit_triggered() {
     qDebug() << "Exit action";
-    save_config();
+    saveConfig();
 }
 
 void MainWindow::on_pswEdit_returnPressed() {
@@ -540,8 +565,33 @@ void MainWindow::on_archDelButton_clicked() {
     }
 }
 
+void MainWindow::on_resetErrButton_clicked() {
+    int row = 0;
+    for(auto &i : infiles) {
+        if(i.state != InputFile::FINISHED) {
+            i.state = InputFile::WAITING;
+            ui->infilesList->item(row)->setIcon(infiles.ready_icon);
+        }
+        row += 1;
+    }
+}
+
+void MainWindow::on_clrDbgoutButton_clicked() {
+    ui->dbgoutEdit->clear();
+}
+
 void MainWindow::on_actionDbgout_triggered() {
     qDebug() << "Triggle debug output textedit";
     ui->line->setVisible(!ui->line->isVisible());
     ui->dbgGroupBox->setVisible(!ui->dbgGroupBox->isVisible());
+}
+
+void MainWindow::saveConfig() {
+    qDebug() << "Save config";
+    export_config("./extractcfg.json");
+}
+
+void MainWindow::setInfileState(int row, QIcon icon, QString tooltip) {
+    ui->infilesList->item(row)->setIcon(icon);
+    ui->infilesList->item(row)->setToolTip(tooltip);
 }

@@ -1,154 +1,85 @@
 {
-    "extract_pgmnames": [
-        "bc.exe",
-        "UnRAR.exe"
-    ],
-    "extracts": [
+    "head_pattern": [
         {
-            "args": [
-                "x",
-                "-y",
-                "$(infile)",
-                "$(outdir)"
-            ],
-            "error_detect": {
-                "archive_error": "ERROR: Unkno.. archive",
-                "psw_error": "ERROR: Password required"
-            },
-            "ext_names": [
-                "zip",
-                "7z",
-                "cab",
-                "gz",
-                "bz2",
-                "xz",
-                "lzma",
-                "wim"
-            ],
-            "program": "$(bc.exe)",
-            "succeed_errorlevel": 0
-        },
-        {
-            "args": [
-                "x",
-                "-y",
-                "-p-",
-                "-p$(psw)",
-                "--",
-                "$(infile)",
-                "$(outdir)"
-            ],
-            "error_detect": {
-                "archive_error": "is not RAR archive",
-                "psw_error": "The specified password is incorrect\\."
-            },
-            "ext_names": [
-                "rar"
-            ],
-            "program": "$(UnRAR.exe)",
-            "succeed_errorlevel": 0
+            "ext_name": "zip",
+            "head": [80, 75, 3, 4]
+        }, {
+            "ext_name": "rar",
+            "head": [82, 97, 114, 33]
+        }, {
+            "ext_name": "7z",
+            "head": [55, 122, 188, 175]
+        }, {
+            "ext_name": "cab",
+            "head": [77, 83, 67, 70]
+        }, {
+            "ext_name": "gz",
+            "head": [31, 139, 8, 8]
+        }, {
+            "ext_name": "bz2",
+            "head": [66, 90, 104, 57]
+        }, {
+            "ext_name": "xz",
+            "head": [253, 55, 122, 88, 90]
+        }, {
+            "ext_name": "lzma",
+            "head": [93, 0, 0, 64]
+        }, {
+            "ext_name": "wim",
+            "head": [77, 83, 87, 73, 77]
         }
     ],
     "filename_psw_pattern": "\\{([^}]+)\\}",
-    "head_pattern": [
+    "variables": {
+        "7z.exe": "./pgms/7z/7z.exe",
+        "UnRAR.exe": "./pgms/rar/UnRAR.exe",
+        "unzip.exe": "./pgms/zip/unzip.exe"
+    },
+    "passwords": [
+        "漂流的云(PLDY)"
+    ],
+    "extract_pgmnames": [
+        "bc.exe",
+        "UnRAR.exe",
+        "7z.exe",
+        "unzip.exe"
+    ],
+    "outdir": "../outdir",
+    "extracts": [
         {
-            "ext_name": "gz",
-            "head": [
-                31,
-                139,
-                8,
-                8
-            ]
-        },
-        {
-            "ext_name": "zip",
-            "head": [
-                50,
-                75,
-                3,
-                4
-            ]
-        },
-        {
-            "ext_name": "7z",
-            "head": [
-                55,
-                122,
-                188,
-                175
-            ]
-        },
-        {
-            "ext_name": "bz2",
-            "head": [
-                66,
-                90,
-                104,
-                57
-            ]
-        },
-        {
-            "ext_name": "cab",
-            "head": [
-                77,
-                83,
-                67,
-                70
-            ]
-        },
-        {
-            "ext_name": "wim",
-            "head": [
-                77,
-                83,
-                87,
-                73,
-                77
-            ]
-        },
-        {
-            "ext_name": "rar",
-            "head": [
-                82,
-                97,
-                114,
-                33
-            ]
-        },
-        {
-            "ext_name": "lzma",
-            "head": [
-                93,
-                0,
-                0,
-                64
-            ]
-        },
-        {
-            "ext_name": "xz",
-            "head": [
-                253,
-                55,
-                122,
-                88,
-                90
-            ]
+            "ext_names": ["rar"],
+            "program": "$(UnRAR.exe)",
+            "args": ["x", "-y", "-p-", "-p$(psw)", "--", "$(infile)", "$(outdir)"],
+            "succeed_errorlevel": 0,
+            "error_detect": {
+                "psw_error": "The specified password is incorrect\\.",
+                "archive_error": "is not RAR archive"
+            }
+        }, {
+            "ext_names": ["7z"],
+            "program": "$(7z.exe)",
+            "args": ["x", "-y", "-p$(psw)", "$(infile)", "-o$(outdir)"],
+            "succeed_errorlevel": 0,
+            "error_detect": {
+                "psw_error": "Wrong password\\?",
+                "archive_error": "Can not open file as archive"
+            }
+        }, {
+            "ext_names": ["zip"],
+            "program": "$(unzip.exe)",
+            "args": ["-P$(psw)", "-o", "$(infile)", "-d", "$(outdir)"],
+            "succeed_errorlevel": 0,
+            "error_detect": {
+                "psw_error": "incorrect password",
+                "archive_error": "signature not found"
+            }
         }
     ],
     "icons": {
-        "deferr": "./rc/confirm-ico-error-s.png",
         "ok": "./rc/confirm-ico-success-s.png",
         "pswerr": "./rc/confirm-ico-warn-s.png",
+        "deferr": "./rc/confirm-ico-error-s.png",
+        "waiting": "./rc/loading.gif",
         "ready": "./rc/none.png"
-    },
-    "outdir": "../outdir",
-    "passwords": [
-        "TestPsw2",
-        "TestPsw1"
-    ],
-    "variables": {
-        "7Z": "Test",
-        "UnRAR.exe": "C:/Program Files (x86)/Bitser/Rar/UnRAR.exe",
-        "bc.exe": "C:/Program Files/Bandizip/bc.exe"
     }
 }

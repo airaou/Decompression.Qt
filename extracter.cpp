@@ -90,6 +90,7 @@ bool Extracter::canExtract(QString ext_name) const {
 Extracter::ErrorCode Extracter::extract(QString infilepath,
                                         QString outdirpath,
                                         const QSet<QString> &psws,
+                                        bool &quick_exit,
                                         QString &errmsg) const {
 
     EnvVars tmpenv;
@@ -111,17 +112,26 @@ Extracter::ErrorCode Extracter::extract(QString infilepath,
             args << variables.parse(arg, tmpenv);
         }
 
+        qDebug() << "cmd program: " << pgm;
+        qDebug() << "args: " << args;
+
         QProcess process;
         process.setProcessChannelMode(QProcess::MergedChannels);
         process.start(pgm, args);
         QString out;
-        while(!process.waitForFinished(1)) {
+        while(!process.waitForFinished(1) && !quick_exit) {
             QString tmpout = QString::fromLocal8Bit(process.readAll());
             if(tmpout.size()) {
                 qDebug().noquote() << tmpout;
                 out += tmpout;
             }
         }
+        QString tmpout = QString::fromLocal8Bit(process.readAll());
+        if(tmpout.size()) {
+            qDebug().noquote() << tmpout;
+            out += tmpout;
+        }
+        qDebug() << "cmd end";
 
         if(psw_error.has_value()) {
             if(out.indexOf(*psw_error) != -1) {
@@ -131,14 +141,14 @@ Extracter::ErrorCode Extracter::extract(QString infilepath,
 
         if(archive_error.has_value()) {
             if(out.indexOf(*archive_error) != -1) {
-                errmsg = QObject::tr("Archive error");
+                errmsg = QObject::tr("Archive error, program: %1").arg(pgm);
                 return Extracter::ARCH_ERROR;
             }
         }
 
         if(succeed_errorlevel.has_value()) {
             if(process.exitCode() != *succeed_errorlevel) {
-                errmsg = QObject::tr("Exit code incorrect");
+                errmsg = QObject::tr("Exit code %1 is not expect(%2)").arg(process.exitCode()).arg(*succeed_errorlevel);
                 return Extracter::EXITCODE_INCORRECT;
             }
         }

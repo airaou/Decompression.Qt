@@ -7,8 +7,7 @@
 class EnvVars : public QMap<QString, QString> {
 public:
     using QMap<QString, QString>::QMap;
-    QString parse(QString const& str) const;
-    QString parse(QString const& str, EnvVars const& defaultenv) const;
+    QString parse(QString const& str, EnvVars const& defaultenv = EnvVars()) const;
 
 protected:
     static constexpr const char* var_syntax = "\\$\\(([^)]+)\\)";

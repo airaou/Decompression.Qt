@@ -47,6 +47,7 @@ public:
     QIcon ok_icon;
     QIcon pswerr_icon;
     QIcon deferr_icon;
+    QIcon ready_icon;
     QIcon waiting_icon;
 };
 

@@ -28,6 +28,7 @@ SOURCES += \
 HEADERS += \
     envvars.h \
     extracter.h \
+    extractworks.h \
     filedetector.h \
     inputfiles.h \
     mainwindow.h

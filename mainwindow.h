@@ -8,6 +8,7 @@
 #include <QRegExp>
 #include <QList>
 #include <QDir>
+#include <QThread>
 #include "extracter.h"
 #include "filedetector.h"
 #include "envvars.h"
@@ -32,6 +33,9 @@ protected:
 private slots:
     void on_startButton_clicked();
     void on_clearButton_clicked();
+    void on_archDelButton_clicked();
+    void on_resetErrButton_clicked();
+    void on_clrDbgoutButton_clicked();
 
     void on_actionAbout_triggered();
     void on_actionHelp_triggered();
@@ -43,10 +47,17 @@ private slots:
 
     void on_pswEdit_returnPressed();
     void on_pswDelButton_clicked();
-    void on_archDelButton_clicked();
 
 public slots:
-    void save_config();
+    void saveConfig();
+    void setInfileState(int row, QIcon icon, QString tooltip);
+
+signals:
+    void message(QString str, int timeout);
+    void debugString(QString str);
+    void changeInfileState(int row, QIcon, QString tooltip);
+    void workFinished(bool);
+    void workProgress(int);
 
 protected:
     void set_qmfile(QString filepath);
@@ -77,5 +88,7 @@ private:
 
     QList<Extracter> extrs;
     FileDetector head_pattern;
+    std::thread t;
+    bool thread_quick_exit;
 };
 #endif // MAINWINDOW_H

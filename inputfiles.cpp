@@ -8,16 +8,18 @@ InputFiles::InputFiles()
 }
 
 void InputFiles::load_icons(const QJsonObject &iconpathobj) {
-    QString ok_path     = iconpathobj["ok"]    .toString("./ok.png"    );
-    QString pswerr_path = iconpathobj["pswerr"].toString("./pswerr.png");
-    QString deferr_path = iconpathobj["deferr"].toString("./deferr.png");
-    QString ready_path  = iconpathobj["ready"] .toString("./ready.png" );
+    QString ok_path      = iconpathobj["ok"]     .toString("./ok.png"    );
+    QString pswerr_path  = iconpathobj["pswerr"] .toString("./pswerr.png");
+    QString deferr_path  = iconpathobj["deferr"] .toString("./deferr.png");
+    QString ready_path   = iconpathobj["ready"]  .toString("./ready.png" );
+    QString waiting_path = iconpathobj["waiting"].toString("./waiting.png");
 
     QFileInfo finfo;
-    if((finfo = ok_path    ).isFile()) ok_icon      = QIcon(ok_path     );
-    if((finfo = pswerr_path).isFile()) pswerr_icon  = QIcon(pswerr_path );
-    if((finfo = deferr_path).isFile()) deferr_icon  = QIcon(deferr_path);
-    if((finfo = ready_path ).isFile()) waiting_icon = QIcon(ready_path  );
+    if((finfo = ok_path     ).isFile()) ok_icon      = QIcon(ok_path     );
+    if((finfo = pswerr_path ).isFile()) pswerr_icon  = QIcon(pswerr_path );
+    if((finfo = deferr_path ).isFile()) deferr_icon  = QIcon(deferr_path );
+    if((finfo = ready_path  ).isFile()) ready_icon   = QIcon(ready_path  );
+    if((finfo = waiting_path).isFile()) waiting_icon = QIcon(waiting_path);
 }
 
 bool InputFiles::contains(QFileInfo fileinfo) const {
@@ -36,7 +38,7 @@ void InputFiles::append(QFileInfo const& fileinfo) {
     };
     QList::append(infile);
     if(listWidget) {
-        auto item = new QListWidgetItem(waiting_icon, fileinfo.filePath(), listWidget);
+        auto item = new QListWidgetItem(ready_icon, fileinfo.filePath(), listWidget);
         listWidget->addItem(item);
     }
 }

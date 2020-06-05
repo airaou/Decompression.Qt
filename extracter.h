@@ -27,6 +27,7 @@ public:
     ErrorCode extract(QString infilepath,
                       QString outdirpath,
                       QSet<QString> const& psws,
+                      bool &quick_exit,
                       QString &errmsg) const;
 
 private:
