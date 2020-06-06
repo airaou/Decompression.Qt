@@ -89,13 +89,18 @@ bool Extracter::canExtract(QString ext_name) const {
 
 Extracter::ErrorCode Extracter::extract(QString infilepath,
                                         QString outdirpath,
-                                        const QSet<QString> &psws,
+                                        const QSet<QString> &namepsws,
                                         bool &quick_exit,
                                         QString &errmsg) const {
 
     EnvVars tmpenv;
     tmpenv["infile"] = infilepath;
     tmpenv["outdir"] = outdirpath;
+
+    QSet<QString> psws(namepsws);
+    if(psws.size() == 0) {
+        psws << "nopswbug";
+    }
 
     for(auto psw : psws) {
         tmpenv["psw"] = psw;
@@ -126,12 +131,19 @@ Extracter::ErrorCode Extracter::extract(QString infilepath,
                 out += tmpout;
             }
         }
+        if(quick_exit) {
+            process.kill();
+        }
         QString tmpout = QString::fromLocal8Bit(process.readAll());
         if(tmpout.size()) {
             qDebug().noquote() << tmpout;
             out += tmpout;
         }
         qDebug() << "cmd end";
+        if(quick_exit) {
+            errmsg = QObject::tr("Stopped.");
+            return Extracter::PGM_ERROR;
+        }
 
         if(psw_error.has_value()) {
             if(out.indexOf(*psw_error) != -1) {

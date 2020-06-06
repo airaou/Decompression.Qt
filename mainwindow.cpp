@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     , translator(nullptr)
     , infiles()
     , thread_quick_exit(false)
+    , thread_finished(true)
 {
     ui->setupUi(this);
 
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::workFinished, ui->startButton, &QPushButton::setEnabled);
     connect(this, &MainWindow::workProgress, ui->progressBar, &QProgressBar::setValue);
     connect(this, &MainWindow::changeInfileState, this, &MainWindow::setInfileState);
+    connect(this, &MainWindow::workFinished, this, &MainWindow::setWorkFinished);
     qDebug() << "Setup";
 }
 
@@ -358,8 +360,20 @@ void MainWindow::dropEvent(QDropEvent *e) {
 
 
 void MainWindow::on_startButton_clicked() {
-    ui->startButton->setDisabled(true);
     qDebug() << "Start button clicked";
+    if(!thread_finished) {
+        ui->statusbar->showMessage(tr("Trying stopping."));
+        thread_quick_exit = true;
+        if(t.joinable()) {
+            t.join();
+        }
+        thread_quick_exit = false;
+        ui->startButton->setText(tr("Start extract"));
+        ui->statusbar->showMessage(tr("Stopped."));
+        thread_finished = true;
+        return;
+    }
+    ui->startButton->setText(tr("Stop"));
     ui->progressBar->setValue(0);
     if(infiles.size() == 0) {
         ui->statusbar->showMessage(tr("No archive to extract."));
@@ -370,6 +384,7 @@ void MainWindow::on_startButton_clicked() {
     if(t.joinable()) {
         t.join();
     }
+    thread_finished = false;
     t = std::thread([this]() {
 
         QList<QFileInfo> newinfiles;
@@ -421,6 +436,14 @@ void MainWindow::on_startButton_clicked() {
                             qDebug() << "Found error: " << errmsg;
                             qDebug() << "Error code: " << code;
                             ui->statusbar->showMessage(tr("Found error: %1.").arg(errmsg));
+                        }
+                        if(thread_quick_exit) {
+                            // 响应外部终止请求
+                            failed += 1;
+                            infile.state = infile.UNKNOWNERR;
+                            emit changeInfileState(row, infiles.deferr_icon, errmsg);
+                            qDebug() << "Quick exit";
+                            return;
                         }
                         switch(code) {
                         case Extracter::PSW_ERROR:
@@ -477,6 +500,7 @@ void MainWindow::on_startButton_clicked() {
         emit message(tr("Succeed: %1, failed: %2, password incorrect: %3, skiped: %4. Found new archive: %5.")
                      .arg(succeed).arg(failed).arg(pswerr).arg(skiped).arg(newinfiles.size()), 0);
         emit workFinished(true);
+        thread_finished = true;
     });
 }
 
@@ -594,4 +618,8 @@ void MainWindow::saveConfig() {
 void MainWindow::setInfileState(int row, QIcon icon, QString tooltip) {
     ui->infilesList->item(row)->setIcon(icon);
     ui->infilesList->item(row)->setToolTip(tooltip);
+}
+
+void MainWindow::setWorkFinished() {
+    ui->startButton->setText(tr("Start extract"));
 }

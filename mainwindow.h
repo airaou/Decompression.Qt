@@ -51,6 +51,7 @@ private slots:
 public slots:
     void saveConfig();
     void setInfileState(int row, QIcon icon, QString tooltip);
+    void setWorkFinished();
 
 signals:
     void message(QString str, int timeout);
@@ -88,7 +89,9 @@ private:
 
     QList<Extracter> extrs;
     FileDetector head_pattern;
+
     std::thread t;
     bool thread_quick_exit;
+    bool thread_finished;
 };
 #endif // MAINWINDOW_H

@@ -100,6 +100,9 @@
              <property name="readOnly">
               <bool>true</bool>
              </property>
+             <property name="placeholderText">
+              <string>拖动文件夹到这里设定输出目录</string>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
@@ -151,6 +154,9 @@
               <widget class="QLineEdit" name="pswEdit">
                <property name="acceptDrops">
                 <bool>false</bool>
+               </property>
+               <property name="placeholderText">
+                <string>这里输入密码，按回车完成输出</string>
                </property>
               </widget>
              </item>
@@ -215,8 +221,8 @@
          <property name="readOnly">
           <bool>true</bool>
          </property>
-         <property name="plainText">
-          <string/>
+         <property name="placeholderText">
+          <string>for 仓库</string>
          </property>
         </widget>
        </item>
